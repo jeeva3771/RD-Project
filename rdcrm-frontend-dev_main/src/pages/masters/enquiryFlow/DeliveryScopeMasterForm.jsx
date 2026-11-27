@@ -1,0 +1,183 @@
+import React from "react";
+import { Select, MenuItem } from "@mui/material";
+import EmojiHelpTooltip from "./EmojiHelpTooltip";
+
+const DeliveryScopeMasterForm = ({
+  formData,
+  errors,
+  isSubmitting,
+  onInputChange,
+  onSubmit,
+  currentId,
+  handleReset,
+}) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">
+          {currentId ? "Edit Delivery Scope" : "Add Delivery Scope"}
+        </h2>
+        {currentId && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+          >
+            Switch to Create
+          </button>
+        )}
+      </div>
+
+      <form onSubmit={onSubmit} className="p-6">
+        <div className="grid md:grid-cols-3 gap-6 mb-4">
+          {/* Scope Key */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Scope Key <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="scope_key"
+              value={formData.scope_key || ""}
+              onChange={onInputChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.scope_key ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="e.g. local, state, domestic, intl"
+            />
+            {errors.scope_key && (
+              <p className="mt-1 text-xs text-red-500">{errors.scope_key}</p>
+            )}
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title || ""}
+              onChange={onInputChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.title ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="e.g. Local delivery"
+            />
+            {errors.title && (
+              <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+            )}
+          </div>
+
+          {/* Subtitle */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Subtitle
+            </label>
+            <input
+              type="text"
+              name="subtitle"
+              value={formData.subtitle || ""}
+              onChange={onInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Within Mumbai / MMR"
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-6 mb-6">
+          {/* Icon / Emoji */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+              <span>Icon / Emoji</span>
+              <EmojiHelpTooltip />
+            </label>
+            <input
+              type="text"
+              name="icon"
+              value={formData.icon || ""}
+              onChange={onInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. 🏙️, 🚚, ✈️, 📦"
+            />
+          </div>
+
+          {/* Transit Days */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Transit Days
+            </label>
+            <input
+              type="number"
+              name="transit_days"
+              value={formData.transit_days ?? 0}
+              onChange={onInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. 0, 1, 3"
+              min="0"
+            />
+          </div>
+
+          {/* Carriers (Comma-separated) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Carriers (comma-separated)
+            </label>
+            <input
+              type="text"
+              name="carriersText"
+              value={formData.carriersText || ""}
+              onChange={onInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Our vehicle, Porter, Courier"
+            />
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <Select
+              name="is_active"
+              value={formData.is_active ?? true}
+              onChange={onInputChange}
+              displayEmpty
+              className="w-full"
+              size="small"
+            >
+              <MenuItem value={true}>Active</MenuItem>
+              <MenuItem value={false}>Inactive</MenuItem>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`px-4 py-2 text-sm font-medium text-white rounded-lg cursor-pointer ${
+              isSubmitting ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {isSubmitting
+              ? "Saving..."
+              : currentId
+              ? "Update Delivery Scope"
+              : "Add Delivery Scope"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default DeliveryScopeMasterForm;

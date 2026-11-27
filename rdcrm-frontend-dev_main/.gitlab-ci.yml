@@ -1,0 +1,44 @@
+stages:
+  - lint_check
+  - deploy
+
+# ---- FRONTEND LINT CHECK ----
+frontend_lint:
+  stage: lint_check
+  tags:
+    - vps-runner
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+  script:
+    - echo "=== Running Frontend Lint ==="
+    - npm install
+    - npm run lint
+
+# ---- FRONTEND PRODUCTION DEPLOY ----
+frontend_deploy:
+  stage: deploy
+  tags:
+    - vps-runner
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  before_script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  script:
+    - |
+      ssh root@${SERVER_HOST} "
+        # Go straight to frontend folder
+        FRONTEND_DIR='/var/www/rdcrm-frontend'
+
+        cd \$FRONTEND_DIR
+        git fetch --all
+        git reset --hard origin/main
+
+        npm install
+        npm run build
+      "

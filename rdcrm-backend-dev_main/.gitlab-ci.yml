@@ -1,0 +1,46 @@
+stages:
+  - lint_check
+  - deploy
+
+# ---- BACKEND LINT CHECK ----
+backend_lint:
+  stage: lint_check
+  tags:
+    - vps-backend-runner
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+  script:
+    - echo "=== Running Backend Lint ==="
+    - npm install
+    - npm run lint
+    - node --check index.js
+
+# ---- BACKEND PRODUCTION DEPLOY ----
+backend_deploy:
+  stage: deploy
+  tags:
+    - vps-backend-runner
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  before_script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  script:
+    - |
+      ssh root@${SERVER_HOST} "
+        # Go straight to backend folder
+        BACKEND_DIR='/var/www/rdcrm-backend'
+
+        cd \$BACKEND_DIR
+        git fetch --all
+        git reset --hard origin/main
+
+        npm install --production
+        pm2 reload rdcrm-backend || pm2 start index.js --name \"rdcrm-backend\"
+        pm2 save
+      "
